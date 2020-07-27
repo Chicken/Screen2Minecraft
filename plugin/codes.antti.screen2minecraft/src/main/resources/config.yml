@@ -1,0 +1,6 @@
+#only touch width and height
+#bpp and port for advanced users
+screenWidth: 1920
+screenHeight: 1080
+bytesPerPixel: 4
+port: 1337

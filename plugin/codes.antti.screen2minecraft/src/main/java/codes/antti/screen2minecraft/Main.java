@@ -1,5 +1,6 @@
 package codes.antti.screen2minecraft;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.configuration.file.FileConfiguration;
 import java.io.*;
 import java.net.*;
 
@@ -9,19 +10,25 @@ public class Main extends JavaPlugin {
 	private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
+    private int bufferSize;
+    public int screenWidth;
+    public int screenHeight;
     @Override
     public void onEnable() {
+        this.saveDefaultConfig();
+        FileConfiguration config = this.getConfig();
         socketHandler = new Thread() {
             public void run() {
                 try {
-                    serverSocket = new ServerSocket(1337);
+                    screenWidth = config.getInt("screenWidth");
+                    screenHeight = config.getInt("screenHeight");
+                    bufferSize = screenWidth * screenHeight * config.getInt("bytesPerPixel");
+
+                    serverSocket = new ServerSocket(config.getInt("port"));
 	                clientSocket = serverSocket.accept();
 	                out = new PrintWriter(clientSocket.getOutputStream(), true);
                     in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                    int screenWidth = 1366;
-                    int screenHeight = 768;
-                    int bufferSize = screenWidth * screenHeight * 4;
                     int index = 0;
                     int[] data = new int[bufferSize];
 
