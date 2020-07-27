@@ -9,5 +9,5 @@ setInterval(()=>{
     client.write(ss.image)
     let elapsed = Date.now()-start;
     console.log(`Finished in ${elapsed}ms. Extra data:`);
-    console.log(ss);
+    console.log(ss.colorAt(0, 0));
 }, 1000)

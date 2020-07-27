@@ -38,7 +38,7 @@ public class Main extends JavaPlugin {
                             data[index] = cur;
                             index++;
                         } else {
-                            getLogger().info(Integer.toHexString(data[0]));
+                            getLogger().info(Integer.toHexString(data[2]) + Integer.toHexString(data[1]) + Integer.toHexString(data[0]));
                             data = new int[bufferSize];
                             index = 0;
                         }
