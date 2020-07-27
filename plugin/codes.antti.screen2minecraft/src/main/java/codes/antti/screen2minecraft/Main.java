@@ -59,9 +59,11 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            out.close();
-            in.close();
-            clientSocket.close();
+            if(clientSocket != null) {
+                out.close();
+                in.close();
+                clientSocket.close();
+            }
             serverSocket.close();
         } catch (IOException e) {
             getLogger().info("error");
