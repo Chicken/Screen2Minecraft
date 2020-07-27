@@ -13,6 +13,7 @@ public class Main extends JavaPlugin {
     private int bufferSize;
     public int screenWidth;
     public int screenHeight;
+    public int downScale;
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
@@ -22,6 +23,7 @@ public class Main extends JavaPlugin {
                 try {
                     screenWidth = config.getInt("screenWidth");
                     screenHeight = config.getInt("screenHeight");
+                    downScale = config.getInt("downScale");
                     bufferSize = screenWidth * screenHeight * config.getInt("bytesPerPixel");
 
                     serverSocket = new ServerSocket(config.getInt("port"));
@@ -39,6 +41,8 @@ public class Main extends JavaPlugin {
                             index++;
                         } else {
                             getLogger().info(Integer.toHexString(data[2]) + Integer.toHexString(data[1]) + Integer.toHexString(data[0]));
+                            getLogger().info(String.valueOf(data.length/downScale));
+                            getLogger().info(String.valueOf(data.length/(screenWidth*4)));
                             data = new int[bufferSize];
                             index = 0;
                         }
