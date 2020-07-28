@@ -1,13 +1,13 @@
-const robot = require("robotjs");
-const net = require("net");
-
-let client = net.connect(1337, "localhost")
+const robot = require("robotjs"),
+      net = require("net"),
+      config = require("./config.json"),
+      client = net.connect(config.port, config.address);
 
 setInterval(()=>{
     let start = Date.now();
     let ss = robot.screen.capture();
-    client.write(ss.image)
+    client.write(ss.image);
     let elapsed = Date.now()-start;
-    console.log(`Finished in ${elapsed}ms. Extra data:`);
-    console.log(ss.colorAt(0, 0));
-}, 1000)
+    console.log(`Finished in ${elapsed}ms.`);
+    if(config.debug) console.log(ss);
+}, 1000/config.fps)
