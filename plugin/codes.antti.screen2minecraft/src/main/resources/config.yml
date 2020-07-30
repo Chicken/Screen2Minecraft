@@ -1,0 +1,7 @@
+#only touch width, height and downscale
+#bpp and port for advanced users
+screenWidth: 1920
+screenHeight: 1080
+downScale: 5
+bytesPerPixel: 4
+port: 1337

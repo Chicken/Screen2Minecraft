@@ -1,55 +1,72 @@
 package codes.antti.screen2minecraft;
 import org.bukkit.plugin.java.JavaPlugin;
-import java.net.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import java.io.*;
+import java.net.*;
 
 public class Main extends JavaPlugin {
-
+    private Thread socketHandler;
     private ServerSocket serverSocket;
-    private Socket clientSocket;
+	private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
-    private Thread thread;
-        
+    private int bufferSize;
+    public int screenWidth;
+    public int screenHeight;
+    public int downScale;
     @Override
     public void onEnable() {
-        thread = new Thread() {
+        this.saveDefaultConfig();
+        FileConfiguration config = this.getConfig();
+        socketHandler = new Thread() {
             public void run() {
                 try {
-                    serverSocket = new ServerSocket(1337);
-                    getLogger().info("Screen to minecraft has started.");
-                    clientSocket = serverSocket.accept();
-                    out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    screenWidth = config.getInt("screenWidth");
+                    screenHeight = config.getInt("screenHeight");
+                    downScale = config.getInt("downScale");
+                    bufferSize = screenWidth * screenHeight * config.getInt("bytesPerPixel");
+
+                    serverSocket = new ServerSocket(config.getInt("port"));
+	                clientSocket = serverSocket.accept();
+	                out = new PrintWriter(clientSocket.getOutputStream(), true);
                     in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    int count = 0;
-                    int[] data = new int[14745600];
-                    //14745600
+
+                    int index = 0;
+                    int[] data = new int[bufferSize];
+
                     while (true) {
-                        int input = in.read();
-                        data[count] = input;
-                        count++;
-                        if(count==14745600) {
-                            getLogger().info("Debug: " + Integer.toHexString(data[0]) + Integer.toHexString(data[1]) + Integer.toHexString(data[2]));
-                            count = 0;
+                        int cur = in.read();
+                        if(index != bufferSize-1) {
+                            data[index] = cur;
+                            index++;
+                        } else {
+                            getLogger().info(Integer.toHexString(data[2]) + Integer.toHexString(data[1]) + Integer.toHexString(data[0]));
+                            getLogger().info(String.valueOf(data.length/downScale));
+                            getLogger().info(String.valueOf(data.length/(screenWidth*4)));
+                            data = new int[bufferSize];
+                            index = 0;
                         }
                     }
+
                 } catch (IOException e) {
-                    getLogger().info("err");
+                    getLogger().info("error");
                 }
             }
         };
-        thread.start();
-
+        socketHandler.start();
+        getLogger().info("Screen to minecraft has started.");
     }
     @Override
     public void onDisable() {
         try {
-            in.close();
-	        out.close();
-            clientSocket.close();
+            if(clientSocket != null) {
+                out.close();
+                in.close();
+                clientSocket.close();
+            }
             serverSocket.close();
-        } catch(IOException e) {
-            getLogger().info("Something went wrong with the sockets.");
+        } catch (IOException e) {
+            getLogger().info("error");
         }
         getLogger().info("Screen to minecraft has been disabled.");
     }
