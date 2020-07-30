@@ -1,6 +1,9 @@
 package codes.antti.screen2minecraft;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import java.io.*;
 import java.net.*;
 
@@ -14,17 +17,20 @@ public class Main extends JavaPlugin {
     public int screenWidth;
     public int screenHeight;
     public int downScale;
+    public int bytesPerPixel;
     @Override
     public void onEnable() {
-        this.saveDefaultConfig();
-        FileConfiguration config = this.getConfig();
+        JavaPlugin plugin = this;
+        plugin.saveDefaultConfig();
+        FileConfiguration config = plugin.getConfig();
         socketHandler = new Thread() {
             public void run() {
                 try {
                     screenWidth = config.getInt("screenWidth");
                     screenHeight = config.getInt("screenHeight");
                     downScale = config.getInt("downScale");
-                    bufferSize = screenWidth * screenHeight * config.getInt("bytesPerPixel");
+                    bytesPerPixel = config.getInt("bytesPerPixel");
+                    bufferSize = screenWidth * screenHeight * bytesPerPixel;
 
                     serverSocket = new ServerSocket(config.getInt("port"));
 	                clientSocket = serverSocket.accept();
@@ -41,8 +47,20 @@ public class Main extends JavaPlugin {
                             index++;
                         } else {
                             getLogger().info(Integer.toHexString(data[2]) + Integer.toHexString(data[1]) + Integer.toHexString(data[0]));
-                            getLogger().info(String.valueOf(data.length/downScale));
-                            getLogger().info(String.valueOf(data.length/(screenWidth*4)));
+                            for(int y = 0; y < screenHeight/downScale; y++) {
+                                for(int x = 0; x < screenWidth/downScale; x++) {
+                                    Location loc = new Location(Bukkit.getServer().getWorld("world"), x,3,y);
+                                    //need a data array of all blocks and their rgb 
+                                    //then find closest one to the color at current x,y and get their material
+                                    //Material.valueOf("blockname")
+                                    //data[x*downScale*bytesPerPixel + y*screenWidth*downScale*bytesPerPixel];
+                                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                                        public void run() {
+                                            loc.getBlock().setType(Material.BEDROCK);
+                                        }
+                                    });
+                                }
+                            }
                             data = new int[bufferSize];
                             index = 0;
                         }
