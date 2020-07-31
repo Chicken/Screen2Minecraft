@@ -4,6 +4,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.World;
 import java.io.*;
 import java.net.*;
 
@@ -14,6 +16,8 @@ public class Main extends JavaPlugin {
     private PrintWriter out;
     private BufferedReader in;
     private int bufferSize;
+    private BukkitScheduler scheduler;
+    private World world;
     public int screenWidth;
     public int screenHeight;
     public int downScale;
@@ -26,6 +30,8 @@ public class Main extends JavaPlugin {
         socketHandler = new Thread() {
             public void run() {
                 try {
+                    scheduler = Bukkit.getServer().getScheduler();
+                    world = Bukkit.getServer().getWorld("world");
                     screenWidth = config.getInt("screenWidth");
                     screenHeight = config.getInt("screenHeight");
                     downScale = config.getInt("downScale");
@@ -46,17 +52,14 @@ public class Main extends JavaPlugin {
                             data[index] = cur;
                             index++;
                         } else {
-                            getLogger().info(Integer.toHexString(data[2]) + Integer.toHexString(data[1]) + Integer.toHexString(data[0]));
                             for(int y = 0; y < screenHeight/downScale; y++) {
                                 for(int x = 0; x < screenWidth/downScale; x++) {
-                                    Location loc = new Location(Bukkit.getServer().getWorld("world"), x,3,y);
-                                    //need a data array of all blocks and their rgb 
-                                    //then find closest one to the color at current x,y and get their material
-                                    //Material.valueOf("blockname")
-                                    //data[x*downScale*bytesPerPixel + y*screenWidth*downScale*bytesPerPixel];
-                                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                                    Location loc = new Location(world, x,3,y);
+                                    int dataIndex = x*bytesPerPixel*downScale + y*screenWidth*bytesPerPixel*downScale;
+                                    Material block = Material.valueOf(findClosest(toHex(data[dataIndex], data[dataIndex+1], data[dataIndex+2])));
+                                    scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {
                                         public void run() {
-                                            loc.getBlock().setType(Material.BEDROCK);
+                                            loc.getBlock().setType(block);
                                         }
                                     });
                                 }
@@ -87,5 +90,34 @@ public class Main extends JavaPlugin {
             getLogger().info("error");
         }
         getLogger().info("Screen to minecraft has been disabled.");
+    }
+
+    public String findClosest(String hex) {
+        int num = Integer.parseInt(hex,16);
+        if(num==16711680) {
+            return "RED_CONCRETE";
+        } 
+        if(num<8421504) {
+            return "BLACK_CONCRETE";
+        } else {
+            return "WHITE_CONCRETE";
+        }
+    }
+
+    public String toHex(int r ,int g ,int b) {
+        String hex = "";
+        hex += Integer.toHexString(r);
+        hex += Integer.toHexString(g);
+        hex += Integer.toHexString(b);
+        try {
+            Integer.parseInt(hex,16);
+        } catch (NumberFormatException e) {
+            getLogger().info(String.valueOf(r) + " " + String.valueOf(g) + " " + String.valueOf(b));
+            return "ff0000";
+        }
+        return hex;
+    }
+    public String right(String value, int length) {
+        return value.substring(value.length() - length);
     }
 }
