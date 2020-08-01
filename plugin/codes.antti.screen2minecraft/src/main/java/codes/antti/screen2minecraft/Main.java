@@ -145,8 +145,8 @@ public class Main extends JavaPlugin {
         int g1 = a.getGreen();
         int b1 = a.getBlue();
         int r2 = b.getRed();
-        int g2 = a.getGreen();
-        int b2 = a.getBlue();
+        int g2 = b.getGreen();
+        int b2 = b.getBlue();
         double drp2 = Math.pow(r1-r2,2);
         double dgp2 = Math.pow(g1-g2,2);
         double dbp2 = Math.pow(b1-b2,2);
