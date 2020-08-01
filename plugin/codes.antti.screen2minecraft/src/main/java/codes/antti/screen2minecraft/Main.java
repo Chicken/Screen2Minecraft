@@ -6,6 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.World;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
@@ -21,7 +24,7 @@ public class Main extends JavaPlugin {
     private int bufferSize;
     private BukkitScheduler scheduler;
     private World world;
-    public HashMap<String, String> blocks = new HashMap<String, String>();
+    public HashMap<String, Color> blocks = new HashMap<String, Color>();
     public int screenWidth;
     public int screenHeight;
     public int downScale;
@@ -30,26 +33,28 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         JavaPlugin plugin = this;
         plugin.saveDefaultConfig();
+        plugin.saveResource("baked_blocks.json", false);
         FileConfiguration config = plugin.getConfig();
         socketHandler = new Thread() {
             public void run() {
                 try {
-                    blocks.put("WHITE_CONCRETE", "CFD5D6");
-                    blocks.put("ORANGE_CONCRETE","E06101");
-                    blocks.put("MAGENTA_CONCRETE","A9309F");
-                    blocks.put("LIGHT_BLUE_CONCRETE","2489C7");
-                    blocks.put("YELLOW_CONCRETE","F1AF15");
-                    blocks.put("LIME_CONCRETE","5EA919");
-                    blocks.put("PINK_CONCRETE","D6658F");
-                    blocks.put("GRAY_CONCRETE","373A3E");
-                    blocks.put("LIGHT_GRAY_CONCRETE","7D7D73");
-                    blocks.put("CYAN_CONCRETE","157788");
-                    blocks.put("PURPLE_CONCRETE","64209C");
-                    blocks.put("BLUE_CONCRETE","2D2F8F");
-                    blocks.put("BROWN_CONCRETE","603C20");
-                    blocks.put("GREEN_CONCRETE","495B24");
-                    blocks.put("RED_CONCRETE","8E2121");
-                    blocks.put("BLACK_CONCRETE","080A0F");
+                    InputStream blockInputStream = plugin.getResource("baked_blocks.json");
+                    InputStreamReader blockIsReader = new InputStreamReader(blockInputStream);
+                    BufferedReader blockReader = new BufferedReader(blockIsReader);
+                    StringBuffer blockStringBuilder = new StringBuffer();
+                    String curStr;
+
+                    while((curStr = blockReader.readLine())!= null){
+                       blockStringBuilder.append(curStr);
+                    }
+
+                    String bakedBlocks = blockStringBuilder.toString();
+                    JsonArray blockDatas = (JsonArray)(new Gson()).fromJson(bakedBlocks, JsonArray.class);
+                    for(int k = 0; k < blockDatas.size(); k++) {
+                        JsonObject blockData = blockDatas.get(k).getAsJsonObject();
+                        blocks.put(blockData.get("game_id_13").getAsString().split(":")[1].toUpperCase(), new Color(blockData.get("red").getAsInt(), blockData.get("green").getAsInt(), blockData.get("blue").getAsInt()));
+                    }
+
                     scheduler = Bukkit.getServer().getScheduler();
                     world = Bukkit.getServer().getWorld("world");
                     screenWidth = config.getInt("screenWidth");
@@ -118,10 +123,10 @@ public class Main extends JavaPlugin {
     public String findClosest(int r, int g, int b) {
         double closestDist = Double.MAX_VALUE;
         String closestBlock = "";
-        for(Map.Entry<String, String> entry : blocks.entrySet()) {
+        for(Map.Entry<String, Color> entry : blocks.entrySet()) {
             String name = entry.getKey();
-            String value = entry.getValue();
-            double distance = dist(new Color(r, g, b), Color.decode("#"+value));
+            Color value = entry.getValue();
+            double distance = dist(new Color(r, g, b), value);
             if(distance<closestDist) {
                 closestDist = distance;
                 closestBlock = name; 
@@ -144,3 +149,4 @@ public class Main extends JavaPlugin {
         return Math.sqrt( 2 * drp2 + 4 * dgp2 + 3 * dbp2 + t * ( drp2 - dbp2 ) / 256);
     }
 }
+
