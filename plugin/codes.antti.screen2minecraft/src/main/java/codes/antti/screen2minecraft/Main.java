@@ -55,6 +55,8 @@ public class Main extends JavaPlugin {
                         blocks.put(blockData.get("game_id_13").getAsString().split(":")[1].toUpperCase(), new Color(blockData.get("red").getAsInt(), blockData.get("green").getAsInt(), blockData.get("blue").getAsInt()));
                     }
 
+                    getLogger().info("Loaded " + String.valueOf(blocks.size()) + " blocks.");
+
                     scheduler = Bukkit.getServer().getScheduler();
                     world = Bukkit.getServer().getWorld("world");
                     screenWidth = config.getInt("screenWidth");
@@ -64,6 +66,7 @@ public class Main extends JavaPlugin {
                     bufferSize = screenWidth * screenHeight * bytesPerPixel;
 
                     serverSocket = new ServerSocket(config.getInt("port"));
+                    getLogger().info("Waiting for connection.");
 	                clientSocket = serverSocket.accept();
 	                out = new PrintWriter(clientSocket.getOutputStream(), true);
                     in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -98,7 +101,7 @@ public class Main extends JavaPlugin {
                     }
 
                 } catch (IOException e) {
-                    getLogger().info("error");
+                    getLogger().info("Error! Probaly client disconnection, reload the plugin.");
                 }
             }
         };
