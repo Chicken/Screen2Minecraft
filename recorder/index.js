@@ -5,7 +5,7 @@ const robot = require("robotjs"),
 
 setInterval(()=>{
     let start = Date.now();
-    let ss = robot.screen.capture();
+    let ss = robot.screen.capture(0,0,config.screenWidth,config.screenHeight);
     client.write(ss.image);
     let elapsed = Date.now()-start;
     console.log(`Finished in ${elapsed}ms.`);
