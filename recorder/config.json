@@ -2,7 +2,7 @@
     "address": "localhost",
     "port": 1337,
     "fps": 1,
-    "debug": true,
+    "debug": false,
     "screenWidth": 3840,
     "screenHeight": 2160
 }
