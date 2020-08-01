@@ -18,7 +18,7 @@ import java.awt.Color;
 public class Main extends JavaPlugin {
     private Thread socketHandler;
     private ServerSocket serverSocket;
-	private Socket clientSocket;
+    private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
     private int bufferSize;
@@ -29,6 +29,7 @@ public class Main extends JavaPlugin {
     public int screenHeight;
     public int downScale;
     public int bytesPerPixel;
+    
     @Override
     public void onEnable() {
         JavaPlugin plugin = this;
@@ -67,8 +68,8 @@ public class Main extends JavaPlugin {
 
                     serverSocket = new ServerSocket(config.getInt("port"));
                     getLogger().info("Waiting for connection.");
-	                clientSocket = serverSocket.accept();
-	                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    clientSocket = serverSocket.accept();
+                    out = new PrintWriter(clientSocket.getOutputStream(), true);
                     in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
                     int index = 0;
@@ -108,6 +109,7 @@ public class Main extends JavaPlugin {
         socketHandler.start();
         getLogger().info("Screen to minecraft has started.");
     }
+
     @Override
     public void onDisable() {
         try {
