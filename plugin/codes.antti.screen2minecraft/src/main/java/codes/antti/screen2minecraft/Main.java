@@ -58,8 +58,8 @@ public class Main extends JavaPlugin {
 
                     getLogger().info("Loaded " + String.valueOf(blocks.size()) + " blocks.");
 
-                    scheduler = Bukkit.getServer().getScheduler();
-                    world = Bukkit.getServer().getWorld("world");
+					scheduler = Bukkit.getServer().getScheduler();
+					world = Bukkit.getServer().getWorlds().get(0);
                     screenWidth = config.getInt("screenWidth");
                     screenHeight = config.getInt("screenHeight");
                     downScale = config.getInt("downScale");
@@ -86,7 +86,7 @@ public class Main extends JavaPlugin {
                         } else {
                             for(int y = 0; y < screenHeight/downScale; y++) {
                                 for(int x = 0; x < screenWidth/downScale; x++) {
-                                    Location loc = new Location(world, x,3,y);
+									Location loc = new Location(world, x,3,y);
                                     int dataIndex = x*bytesPerPixel*downScale + y*screenWidth*bytesPerPixel*downScale;
                                     Material block = Material.valueOf(findClosest(data[dataIndex+2], data[dataIndex+1], data[dataIndex]));
                                     scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {
@@ -102,7 +102,7 @@ public class Main extends JavaPlugin {
                     }
 
                 } catch (IOException e) {
-                    getLogger().info("Error! Probaly client disconnection, reload the plugin.");
+                    getLogger().info("Error! Probably client disconnection, reload the plugin.");
                 }
             }
         };
