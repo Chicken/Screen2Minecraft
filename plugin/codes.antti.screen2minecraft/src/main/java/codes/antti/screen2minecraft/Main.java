@@ -24,11 +24,15 @@ public class Main extends JavaPlugin {
     private int bufferSize;
     private BukkitScheduler scheduler;
     private World world;
+    private Material oldState[][];
     public HashMap<String, Color> blocks = new HashMap<String, Color>();
     public int screenWidth;
     public int screenHeight;
     public int downScale;
     public int bytesPerPixel;
+    public int xoffset;
+    public int yoffset;
+    public int zoffset;
     
     @Override
     public void onEnable() {
@@ -56,15 +60,29 @@ public class Main extends JavaPlugin {
                         blocks.put(blockData.get("game_id_13").getAsString().split(":")[1].toUpperCase(), new Color(blockData.get("red").getAsInt(), blockData.get("green").getAsInt(), blockData.get("blue").getAsInt()));
                     }
 
-                    getLogger().info("Loaded " + String.valueOf(blocks.size()) + " blocks.");
+                    getLogger().info("Loaded " + String.valueOf(blocks.size()) + " blocks / colors.");
 
                     scheduler = Bukkit.getServer().getScheduler();
-                    world = Bukkit.getServer().getWorld("world");
+                    world = Bukkit.getServer().getWorld(config.getString("world"));
                     screenWidth = config.getInt("screenWidth");
                     screenHeight = config.getInt("screenHeight");
                     downScale = config.getInt("downScale");
                     bytesPerPixel = config.getInt("bytesPerPixel");
+                    xoffset = config.getInt("xoffset");
+                    yoffset = config.getInt("yoffset");
+                    zoffset = config.getInt("zoffset");
                     bufferSize = screenWidth * screenHeight * bytesPerPixel;
+
+                    getLogger().info("Saving old state of blocks.");
+                    oldState = new Material[screenWidth/downScale][screenHeight/downScale];
+
+                    for(int z = 0; z < screenHeight/downScale; z++) {
+                        for(int x = 0; x < screenWidth/downScale; x++) {
+                            oldState[x][z] = new Location(world, x+xoffset,yoffset,z+zoffset).getBlock().getType();
+                        }
+                    }
+
+                    getLogger().info("Saved old state of blocks.");
 
                     serverSocket = new ServerSocket(config.getInt("port"));
                     getLogger().info("Waiting for connection.");
@@ -84,10 +102,10 @@ public class Main extends JavaPlugin {
                             data[index] = cur;
                             index++;
                         } else {
-                            for(int y = 0; y < screenHeight/downScale; y++) {
+                            for(int z = 0; z < screenHeight/downScale; z++) {
                                 for(int x = 0; x < screenWidth/downScale; x++) {
-                                    Location loc = new Location(world, x,3,y);
-                                    int dataIndex = x*bytesPerPixel*downScale + y*screenWidth*bytesPerPixel*downScale;
+                                    Location loc = new Location(world, x+xoffset,yoffset,z+zoffset);
+                                    int dataIndex = x*bytesPerPixel*downScale + z*screenWidth*bytesPerPixel*downScale;
                                     Material block = Material.valueOf(findClosest(data[dataIndex+2], data[dataIndex+1], data[dataIndex]));
                                     scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {
                                         public void run() {
@@ -96,13 +114,25 @@ public class Main extends JavaPlugin {
                                     });
                                 }
                             }
-                            data = new int[bufferSize];
                             index = 0;
                         }
                     }
 
                 } catch (IOException e) {
                     getLogger().info("Error! Probaly client disconnection, reload the plugin.");
+                    getLogger().info("Adding back old blocks.");
+                    for(int z = 0; z < screenHeight/downScale; z++) {
+                        for(int x = 0; x < screenWidth/downScale; x++) {
+                            Location loc = new Location(world, x+xoffset,yoffset,z+zoffset);
+                            Material block = oldState[x][z];
+                            scheduler.scheduleSyncDelayedTask(plugin, new Runnable() {
+                                public void run() {
+                                    loc.getBlock().setType(block);
+                                }
+                            });
+                        }
+                    }
+                    getLogger().info("Added back old blocks.");
                 }
             }
         };
