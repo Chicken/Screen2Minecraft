@@ -1,7 +1,7 @@
 const robot = require("robotjs"),
-net = require("net"),
-config = require("./config.json"),
-client = net.connect(config.port, config.address);
+	net = require("net"),
+	config = require("./config.json"),
+	client = net.connect(config.port, config.address);
 config.screenWidth = config.screenWidth || robot.getScreenSize().width
 config.screenHeight = config.screenHeight || robot.getScreenSize().height
 console.log(`Sending screenshots to ${config.address}:${config.port}.
