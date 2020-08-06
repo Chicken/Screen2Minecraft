@@ -3,11 +3,16 @@ const robot = require("robotjs"),
       config = require("./config.json"),
       client = net.connect(config.port, config.address);
 
+let totalFramesSend = 0;
+
+function sendScreen() {
+    client.write(robot.screen.capture(0,0,config.screenWidth,config.screenHeight).image, ()=>{
+        totalFramesSend++;
+        sendScreen()
+    });
+}
+
+sendScreen();
 setInterval(()=>{
-    let start = Date.now();
-    let ss = robot.screen.capture(0,0,config.screenWidth,config.screenHeight);
-    client.write(ss.image);
-    let elapsed = Date.now()-start;
-    console.log(`Finished in ${elapsed}ms.`);
-    if(config.debug) console.log(ss);
-}, 1000/config.fps)
+    console.log("Fps: ", (totalFramesSend/process.uptime()).toFixed(1));
+}, 1000)
