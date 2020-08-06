@@ -9,6 +9,7 @@
   "author": "antti@antti.codes",
   "license": "ISC",
   "dependencies": {
-    "robotjs": "^0.6.0"
+    "robotjs": "^0.6.0",
+    "sharp": "^0.25.4"
   }
 }

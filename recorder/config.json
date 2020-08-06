@@ -2,6 +2,8 @@
     "address": "localhost",
     "port": 1337,
     "fps": 1,
+    "targetWidth": 256,
+    "targetHeight": 144,
     "screenWidth": 3840,
     "screenHeight": 2160
 }
