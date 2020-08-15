@@ -2,6 +2,8 @@
 
 Used for screensharing to minecraft server.
 
-This is combination of a Node.JS server and a spigot plugin.
+This is a version that doesnt use a client to send the screen.
 
-The node server takes a screencapture and sends it to a minecraft server with a net socket. Then the plugin takes the raw image buffer, turns it into minecraft blocks and places them at world spawn.
+Instead the screen comes from the server.
+
+This is ideal in situations where the server is hosted on a local pc.

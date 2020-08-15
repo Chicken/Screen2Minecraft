@@ -2,6 +2,7 @@ package codes.antti.screen2minecraft;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.Material;
 import java.io.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -9,11 +10,13 @@ import com.google.gson.JsonObject;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ColorUtils {
-    HashMap<String, Color> blocks;
+    HashMap<Material, Color> blocks;
+    HashMap<Color, Material> cache;
 
     public ColorUtils(JavaPlugin plugin) {
         // loading colors
-        blocks = new HashMap<String, Color>();
+        blocks = new HashMap();
+        cache = new HashMap();
 
         try {
             InputStream blockInputStream = plugin.getResource("baked_blocks.json");
@@ -30,7 +33,7 @@ public class ColorUtils {
             JsonArray blockDatas = (JsonArray)(new Gson()).fromJson(bakedBlocks, JsonArray.class);
             for(int k = 0; k < blockDatas.size(); k++) {
                JsonObject blockData = blockDatas.get(k).getAsJsonObject();
-                blocks.put(blockData.get("game_id_13").getAsString().split(":")[1].toUpperCase(), new Color(blockData.get("red").getAsInt(), blockData.get("green").getAsInt(), blockData.get("blue").getAsInt()));
+                blocks.put(Material.valueOf(blockData.get("game_id_13").getAsString().split(":")[1].toUpperCase()), new Color(blockData.get("red").getAsInt(), blockData.get("green").getAsInt(), blockData.get("blue").getAsInt()));
             }
 
             plugin.getLogger().info("Loaded " + String.valueOf(blocks.size()) + " blocks / colors.");
@@ -39,18 +42,22 @@ public class ColorUtils {
         }
     }
 
-    public String findClosest(int r, int g, int b) {
+    public Material findClosest(Color color) {
         double closestDist = Double.MAX_VALUE;
-        String closestBlock = "";
-        for(Map.Entry<String, Color> entry : blocks.entrySet()) {
-            String name = entry.getKey();
+        Material closestBlock = Material.RED_CONCRETE;
+        if(cache.containsKey(color)) {
+            return cache.get(color);
+        }
+        for(Map.Entry<Material, Color> entry : blocks.entrySet()) {
+            Material name = entry.getKey();
             Color value = entry.getValue();
-            double distance = dist(new Color(r, g, b), value);
+            double distance = dist(color, value);
             if(distance<closestDist) {
                 closestDist = distance;
                 closestBlock = name; 
             }    
         }
+        cache.put(color, closestBlock);
         return closestBlock;
     }
 

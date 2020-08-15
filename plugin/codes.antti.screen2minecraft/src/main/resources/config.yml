@@ -1,2 +1,7 @@
-port: 1337
-password: test
+xoffset: 0
+yoffset: 3
+zoffset: 0
+world: world
+downscale: 10
+screenWidth: 3840
+screenHeight: 2160
